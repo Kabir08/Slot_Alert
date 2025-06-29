@@ -1,51 +1,43 @@
 import { json } from '@sveltejs/kit';
 import { redis } from '$lib/redis.js';
 
+function getUserEmailFromCookies(cookies) {
+	// You should set this cookie after login/callback
+	return cookies.get('user_email');
+}
+
 export async function POST({ request, cookies }) {
-	const access_token = cookies.get('access_token');
-	if (!access_token) return json({ error: 'Unauthorized' }, { status: 401 });
+	const userEmail = getUserEmailFromCookies(cookies);
+	if (!userEmail) return json({ error: 'Unauthorized' }, { status: 401 });
 	const { sender, subject, text } = await request.json();
-	// Limit to 3 alerts per user (here, just 'user' for demo)
-	const currentAlerts = await redis.lrange('user:alerts', 0, -1);
-	if (currentAlerts && currentAlerts.length >= 3) {
+	const userRaw = await redis.get(`user:${userEmail}`);
+	if (!userRaw) return json({ error: 'User not found' }, { status: 404 });
+	const user = JSON.parse(userRaw);
+	if (user.alerts.length >= 3) {
 		return json({ error: 'Maximum 3 alerts allowed per user.' }, { status: 400 });
 	}
-	await redis.lpush('user:alerts', JSON.stringify({ sender, subject, text }));
+	user.alerts.push({ sender, subject, text });
+	await redis.set(`user:${userEmail}`, JSON.stringify(user));
 	return json({ success: true });
 }
 
 export async function GET({ cookies }) {
-	const access_token = cookies.get('access_token');
-	if (!access_token) return json({ error: 'Unauthorized' }, { status: 401 });
-	const alerts = await redis.lrange('user:alerts', 0, -1);
-	// Parse alerts for UI
-	const parsed = (alerts || []).map(a => {
-		try {
-			return JSON.parse(a);
-		} catch {
-			return a;
-		}
-	});
-	return json({ alerts: parsed });
+	const userEmail = getUserEmailFromCookies(cookies);
+	if (!userEmail) return json({ error: 'Unauthorized' }, { status: 401 });
+	const userRaw = await redis.get(`user:${userEmail}`);
+	if (!userRaw) return json({ alerts: [] });
+	const user = JSON.parse(userRaw);
+	return json({ alerts: user.alerts || [] });
 }
 
 export async function DELETE({ request, cookies }) {
-	const access_token = cookies.get('access_token');
-	if (!access_token) return json({ error: 'Unauthorized' }, { status: 401 });
+	const userEmail = getUserEmailFromCookies(cookies);
+	if (!userEmail) return json({ error: 'Unauthorized' }, { status: 401 });
 	const { sender, subject, text } = await request.json();
-	const alerts = await redis.lrange('user:alerts', 0, -1);
-	// Remove the first matching alert
-	for (const a of alerts) {
-		let parsed;
-		try {
-			parsed = JSON.parse(a);
-		} catch {
-			continue;
-		}
-		if (parsed.sender === sender && parsed.subject === subject && parsed.text === text) {
-			await redis.lrem('user:alerts', 1, a);
-			break;
-		}
-	}
+	const userRaw = await redis.get(`user:${userEmail}`);
+	if (!userRaw) return json({ error: 'User not found' }, { status: 404 });
+	const user = JSON.parse(userRaw);
+	user.alerts = (user.alerts || []).filter(a => !(a.sender === sender && a.subject === subject && a.text === text));
+	await redis.set(`user:${userEmail}`, JSON.stringify(user));
 	return json({ success: true });
 }
