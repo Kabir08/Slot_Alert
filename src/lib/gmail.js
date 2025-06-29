@@ -34,3 +34,49 @@ export async function getNewMessages(_access_token, query) {
   );
   return details;
 }
+
+// Check if a message is unread
+export async function isMessageUnread(messageId) {
+  const access_token = await getValidAccessToken();
+  if (!access_token) return false;
+  const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=metadata`, {
+    headers: { Authorization: `Bearer ${access_token}` }
+  });
+  const data = await res.json();
+  return data.labelIds && data.labelIds.includes('UNREAD');
+}
+
+// Add a label to a message (creates label if needed)
+export async function addLabelToMessage(messageId, labelName = 'Processed by Slot Alert') {
+  const access_token = await getValidAccessToken();
+  if (!access_token) return false;
+  // Get or create label
+  let labelId = await getOrCreateLabelId(labelName, access_token);
+  if (!labelId) return false;
+  // Add label to message
+  const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}/modify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access_token}` },
+    body: JSON.stringify({ addLabelIds: [labelId] })
+  });
+  return res.ok;
+}
+
+// Helper to get or create a label and return its ID
+async function getOrCreateLabelId(labelName, access_token) {
+  // List labels
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/labels', {
+    headers: { Authorization: `Bearer ${access_token}` }
+  });
+  const data = await res.json();
+  let label = data.labels.find(l => l.name === labelName);
+  if (label) return label.id;
+  // Create label
+  const createRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/labels', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access_token}` },
+    body: JSON.stringify({ name: labelName, labelListVisibility: 'labelShow', messageListVisibility: 'show' })
+  });
+  const createData = await createRes.json();
+  return createData.id;
+}

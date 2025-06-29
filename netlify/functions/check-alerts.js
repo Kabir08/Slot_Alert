@@ -1,6 +1,6 @@
 // Netlify Scheduled Function: Check alerts and trigger Telegram notifications
 import { redis } from '../../src/lib/redis.js';
-import { getNewMessages } from '../../src/lib/gmail.js';
+import { getNewMessages, isMessageUnread, addLabelToMessage } from '../../src/lib/gmail.js';
 import { sendTelegramAlarm } from '../../src/lib/telegram.js';
 
 export default async function handler(event, context) {
@@ -35,8 +35,22 @@ export default async function handler(event, context) {
     if (alert.text) query += `${alert.text} `;
     const messages = await getNewMessages(process.env.GMAIL_ACCESS_TOKEN, query.trim());
     if (messages && messages.length > 0) {
-      // 3. Trigger Telegram alarm for 180 seconds (180 messages, 1 per second)
-      await sendTelegramAlarm(`ALERT: New mail matched your alert!\n${JSON.stringify(messages[0], null, 2)}`, 180);
+      const msg = messages[0];
+      let stillUnread = await isMessageUnread(msg.id);
+      let sentCount = 0;
+      for (let i = 0; i < 180 && stillUnread; i++) {
+        await sendTelegramAlarm(`ALERT: New mail matched your alert!\n${JSON.stringify(msg, null, 2)}`, 1);
+        sentCount++;
+        // Wait 1 second before next alert
+        await new Promise(res => setTimeout(res, 1000));
+        stillUnread = await isMessageUnread(msg.id);
+      }
+      if (!stillUnread) {
+        await addLabelToMessage(msg.id, 'Processed by Slot Alert');
+        console.log(`Stopped alerts for message ${msg.id} after user read it. Labeled as processed.`);
+      } else {
+        console.log(`Sent ${sentCount} alerts for message ${msg.id}, still unread.`);
+      }
       triggered = true;
     }
   }

@@ -5,6 +5,8 @@
   let messages = [];
   let status = '';
   let showToast = false;
+  let activeTab = 'search';
+  let alerts = [];
 
   onMount(async () => {
     // Try to fetch a protected endpoint to check login
@@ -37,6 +39,23 @@
     });
     alert('Alert set!');
   }
+
+  async function fetchAlerts() {
+    const res = await fetch('/api/alerts');
+    const data = await res.json();
+    alerts = data.alerts || [];
+  }
+
+  async function deleteAlert(alert) {
+    await fetch('/api/alerts', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(alert)
+    });
+    await fetchAlerts();
+  }
+
+  $: if (activeTab === 'alerts' && loggedIn) fetchAlerts();
 </script>
 
 {#if showToast}
@@ -49,22 +68,44 @@
     <button on:click={login}>Login with Google</button>
   {/if}
   {#if loggedIn}
-    <input placeholder="Search sender, subject, or content" bind:value={query} />
-    <button on:click={checkMail}>Check Mail</button>
-    <div>{status}</div>
-    <ul>
-      {#each messages as msg}
-        <li>
-          <strong>Subject:</strong> {msg.subject}<br>
-          <strong>From:</strong> {msg.from}<br>
-          <strong>Title:</strong> {msg.title}<br>
-          <strong>Time:</strong> {new Date(Number(msg.time)).toLocaleString()}<br>
-          <button on:click={() => setAlert({ sender: msg.from })}>Set Alert for Sender</button>
-          <button on:click={() => setAlert({ subject: msg.subject })}>Set Alert for Subject</button>
-          <button on:click={() => setAlert({ text: msg.title })}>Set Alert for Text</button>
-        </li>
-      {/each}
-    </ul>
+    <div style="margin-bottom: 1em;">
+      <button on:click={() => activeTab = 'search'} disabled={activeTab === 'search'}>Search Mail</button>
+      <button on:click={() => activeTab = 'alerts'} disabled={activeTab === 'alerts'}>Active Alerts</button>
+    </div>
+    {#if activeTab === 'search'}
+      <input placeholder="Search sender, subject, or content" bind:value={query} />
+      <button on:click={checkMail}>Check Mail</button>
+      <div>{status}</div>
+      <ul>
+        {#each messages as msg}
+          <li>
+            <strong>Subject:</strong> {msg.subject}<br>
+            <strong>From:</strong> {msg.from}<br>
+            <strong>Title:</strong> {msg.title}<br>
+            <strong>Time:</strong> {new Date(Number(msg.time)).toLocaleString()}<br>
+            <button on:click={() => setAlert({ sender: msg.from })}>Set Alert for Sender</button>
+            <button on:click={() => setAlert({ subject: msg.subject })}>Set Alert for Subject</button>
+            <button on:click={() => setAlert({ text: msg.title })}>Set Alert for Text</button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+    {#if activeTab === 'alerts'}
+      <h2>Active Alerts</h2>
+      <ul>
+        {#each alerts as alert}
+          <li>
+            {#if alert.sender}<span><strong>Sender:</strong> {alert.sender}</span>{/if}
+            {#if alert.subject}<span><strong> Subject:</strong> {alert.subject}</span>{/if}
+            {#if alert.text}<span><strong> Text:</strong> {alert.text}</span>{/if}
+            <button on:click={() => deleteAlert(alert)}>Delete</button>
+          </li>
+        {/each}
+        {#if alerts.length === 0}
+          <li>No active alerts.</li>
+        {/if}
+      </ul>
+    {/if}
   {/if}
 </main>
 
