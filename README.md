@@ -1,38 +1,44 @@
-# sv
+# Slot Alert
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Slot Alert is a privacy-focused SvelteKit app that lets you set up alerts for new Gmail messages and receive notifications via Telegram. Built for speed, security, and ease of use.
 
-## Creating a project
+## Features
+- **Google OAuth2 Login:** Secure authentication with your Google account.
+- **Gmail Monitoring:** Search and set alerts for emails by sender, subject, or content.
+- **Telegram Notifications:** Get instant alerts on your phone via Telegram bot.
+- **Multi-User Support:** Each user’s alerts, tokens, and Telegram chat ID are stored securely and separately.
+- **Active Alerts UI:** View and manage your current alerts in the app.
+- **Automatic Token Refresh:** Never miss an alert due to expired tokens.
+- **Netlify Scheduled Functions:** Checks your mailbox every minute for new matching emails.
+- **Upstash Redis:** Fast, serverless storage for sessions, tokens, and alerts.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## How It Works
+1. **Login with Google** to connect your Gmail.
+2. **Send /start to the Slot Alert Telegram bot** and reply with your email to link your account.
+3. **Set up alerts** in the app for sender, subject, or content.
+4. **Get notified** on Telegram when a new matching email arrives.
+5. **Manage alerts** from the "Active Alerts" tab in the app.
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Privacy & Security
+- Your tokens and chat IDs are stored securely in Upstash Redis.
+- We never store your emails, only alert criteria and message IDs.
+- You can delete your alerts or unlink Telegram at any time.
+- See [`/privacy`](./src/routes/privacy/+page.svelte) for full policy.
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Project Journey
+See [`PROJECT_JOURNEY_AND_PRIVACY.md`](./PROJECT_JOURNEY_AND_PRIVACY.md) for a detailed technical journey and milestones.
 
-## Developing
+## Local Development
+1. Clone the repo and run `npm install`.
+2. Copy `.env.example` to `.env` and fill in your credentials.
+3. Run `npm run dev` to start the app locally.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Deployment
+- Deploys seamlessly to Netlify (see `netlify.toml`).
+- Set all required environment variables in the Netlify dashboard.
 
-```bash
-npm run dev
+## Contributing
+Pull requests and issues are welcome!
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## License
+MIT
