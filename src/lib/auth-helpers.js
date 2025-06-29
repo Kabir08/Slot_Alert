@@ -1,10 +1,9 @@
-import { redis, connectRedis } from '$lib/redis.js';
+import { redis } from '$lib/redis.js';
 
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
 
 export async function getValidAccessToken() {
-  await connectRedis();
   let access_token = await redis.get('user:access_token');
   const refresh_token = await redis.get('user:refresh_token');
   // Optionally, check if access_token is expired (not shown here)

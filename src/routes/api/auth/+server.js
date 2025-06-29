@@ -1,7 +1,7 @@
 // OAuth2 login and callback endpoints for Google
 import { json, redirect } from '@sveltejs/kit';
 import crypto from 'crypto';
-import { redis, connectRedis } from '$lib/redis.js';
+import { redis } from '$lib/redis.js';
 import { getValidAccessToken } from '$lib/auth-helpers.js';
 
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
@@ -11,7 +11,6 @@ const SCOPES = process.env.GMAIL_SCOPES ?? '';
 
 // GET /api/auth/login - Redirects to Google OAuth2
 export async function GET({ cookies }) {
-  await connectRedis();
   const state = crypto.randomBytes(16).toString('hex');
   cookies.set('oauth_state', state, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPES)}&access_type=offline&state=${state}&prompt=consent`;
@@ -20,7 +19,6 @@ export async function GET({ cookies }) {
 
 // POST /api/auth/callback - Handles OAuth2 callback (exchange code for tokens)
 export async function POST({ request, cookies }) {
-  await connectRedis();
   const data = await request.json();
   const { code, state } = data;
   const savedState = cookies.get('oauth_state');

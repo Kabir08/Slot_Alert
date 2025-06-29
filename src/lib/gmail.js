@@ -1,5 +1,5 @@
 // Gmail API helper functions
-import { getValidAccessToken } from '../routes/api/auth/+server.js';
+import { getValidAccessToken } from '$lib/auth-helpers.js';
 
 export async function getNewMessages(_access_token, sender) {
   // Always get a valid access token (refresh if needed)
