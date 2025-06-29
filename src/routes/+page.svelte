@@ -1,9 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   let loggedIn = false;
-  let sender = '';
-  let subject = '';
-  let text = '';
+  let query = '';
   let messages = [];
   let status = '';
   let showToast = false;
@@ -24,9 +22,7 @@
 
   async function checkMail() {
     const params = new URLSearchParams();
-    if (sender) params.append('sender', sender);
-    if (subject) params.append('subject', subject);
-    if (text) params.append('text', text);
+    if (query) params.append('q', query);
     const res = await fetch(`/api/check-mail?${params.toString()}`);
     const data = await res.json();
     messages = data.messages || [];
@@ -53,29 +49,15 @@
     <button on:click={login}>Login with Google</button>
   {/if}
   {#if loggedIn}
-    <input placeholder="Sender email" bind:value={sender} />
-    <input placeholder="Subject" bind:value={subject} />
-    <input placeholder="Text in mail" bind:value={text} />
+    <input placeholder="Search sender, subject, or content" bind:value={query} />
     <button on:click={checkMail}>Check Mail</button>
     <div>{status}</div>
     <ul>
       {#each messages as msg}
         <li>
-          <strong>Subject:</strong> {msg.subject}
-          {#if subject && msg.subject && msg.subject.toLowerCase().includes(subject.toLowerCase())}
-            <span class="badge">Subject Match</span>
-          {/if}
-          <br>
-          <strong>From:</strong> {msg.from}
-          {#if sender && msg.from && msg.from.toLowerCase().includes(sender.toLowerCase())}
-            <span class="badge">Sender Match</span>
-          {/if}
-          <br>
-          <strong>Title:</strong> {msg.title}
-          {#if text && msg.title && msg.title.toLowerCase().includes(text.toLowerCase())}
-            <span class="badge">Content Match</span>
-          {/if}
-          <br>
+          <strong>Subject:</strong> {msg.subject}<br>
+          <strong>From:</strong> {msg.from}<br>
+          <strong>Title:</strong> {msg.title}<br>
           <strong>Time:</strong> {new Date(Number(msg.time)).toLocaleString()}<br>
           <button on:click={() => setAlert({ sender: msg.from })}>Set Alert for Sender</button>
           <button on:click={() => setAlert({ subject: msg.subject })}>Set Alert for Subject</button>
