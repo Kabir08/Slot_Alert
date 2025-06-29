@@ -58,24 +58,31 @@
   $: if (activeTab === 'alerts' && loggedIn) fetchAlerts();
 </script>
 
+<nav class="nav">
+  <a href="/">Home</a>
+  <a href="/journey">Project Journey</a>
+  <a href="/privacy">Privacy Policy</a>
+</nav>
+
 {#if showToast}
   <div class="toast">✅ Login successful!</div>
 {/if}
 
 <main>
   <h1>Slot Alert</h1>
+  <p class="desc">Get instant Telegram alerts for new Gmail messages. Secure, fast, and easy to use.</p>
   {#if !loggedIn}
     <button on:click={login}>Login with Google</button>
   {/if}
   {#if loggedIn}
-    <div style="margin-bottom: 1em;">
+    <div class="tabbar">
       <button on:click={() => activeTab = 'search'} disabled={activeTab === 'search'}>Search Mail</button>
       <button on:click={() => activeTab = 'alerts'} disabled={activeTab === 'alerts'}>Active Alerts</button>
     </div>
     {#if activeTab === 'search'}
       <input placeholder="Search sender, subject, or content" bind:value={query} />
       <button on:click={checkMail}>Check Mail</button>
-      <div>{status}</div>
+      <div class="status">{status}</div>
       <ul>
         {#each messages as msg}
           <li>
@@ -88,6 +95,9 @@
             <button on:click={() => setAlert({ text: msg.title })}>Set Alert for Text</button>
           </li>
         {/each}
+        {#if messages.length === 0}
+          <li class="empty">No messages found.</li>
+        {/if}
       </ul>
     {/if}
     {#if activeTab === 'alerts'}
@@ -102,7 +112,7 @@
           </li>
         {/each}
         {#if alerts.length === 0}
-          <li>No active alerts.</li>
+          <li class="empty">No active alerts.</li>
         {/if}
       </ul>
     {/if}
@@ -110,6 +120,89 @@
 </main>
 
 <style>
+  .nav {
+    display: flex;
+    gap: 1.5em;
+    justify-content: center;
+    margin-bottom: 2em;
+    background: #f8f9fa;
+    padding: 1em 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .nav a {
+    color: #0077cc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav a:hover {
+    color: #005fa3;
+    text-decoration: underline;
+  }
+  main {
+    max-width: 600px;
+    margin: 2em auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    padding: 2em;
+  }
+  .desc {
+    color: #444;
+    margin-bottom: 1.5em;
+    font-size: 1.1em;
+    text-align: center;
+  }
+  .tabbar {
+    margin-bottom: 1em;
+  }
+  button {
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5em 1.2em;
+    margin: 0.2em 0.5em 0.2em 0;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #005fa3;
+  }
+  input {
+    padding: 0.5em;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-right: 0.5em;
+    font-size: 1em;
+    width: 60%;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    background: #f4f8fb;
+    margin: 1em 0;
+    padding: 1em;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .empty {
+    color: #888;
+    text-align: center;
+    font-style: italic;
+    background: none;
+    box-shadow: none;
+    padding: 0.5em;
+  }
+  .status {
+    margin: 1em 0 0.5em 0;
+    color: #0077cc;
+    font-weight: 500;
+  }
   .toast {
     position: fixed;
     top: 20px; right: 20px;
@@ -117,8 +210,5 @@
     padding: 12px 24px; border-radius: 6px;
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  .badge {
-    background: #ffd700; color: #333; border-radius: 4px; padding: 2px 6px; margin-left: 6px; font-size: 0.8em;
   }
 </style>
