@@ -5,7 +5,7 @@
   let status = '';
 
   async function login() {
-    window.location.href = '/api/auth';
+    window.location.href = '/api/auth/login';
   }
 
   async function checkMail() {
