@@ -1,12 +1,12 @@
 // Gmail API helper functions
 import { getValidAccessToken } from '$lib/auth-helpers.js';
 
-export async function getNewMessages(_access_token, sender) {
+export async function getNewMessages(_access_token, query) {
   // Always get a valid access token (refresh if needed)
   const access_token = await getValidAccessToken();
   if (!access_token) return [];
-  // Fetch the latest 5 messages from the sender
-  const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from:${encodeURIComponent(sender)}&maxResults=5`, {
+  // Fetch the latest 5 messages matching the query
+  const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=5`, {
     headers: { Authorization: `Bearer ${access_token}` }
   });
   const listData = await listRes.json();
