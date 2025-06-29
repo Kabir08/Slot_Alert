@@ -31,13 +31,40 @@ export async function GET({ url, cookies }) {
   const tokens = await res.json();
   if (tokens.error) return new Response('Token error: ' + tokens.error, { status: 400 });
 
-  // Store tokens in Redis (keyed by a session/user id, here just 'user' for demo)
-  if (tokens.access_token) await redis.set('user:access_token', tokens.access_token);
-  if (tokens.refresh_token) await redis.set('user:refresh_token', tokens.refresh_token);
+  // Fetch user's email using the access token
+  let userEmail = null;
+  let userObj = null;
+  if (tokens.access_token) {
+    const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` }
+    });
+    if (userinfoRes.ok) {
+      const userinfo = await userinfoRes.json();
+      userEmail = userinfo.email;
+      if (userEmail) {
+        const userKey = `user:${userEmail}`;
+        // Try to load existing user object
+        const existingRaw = await redis.get(userKey);
+        userObj = existingRaw ? JSON.parse(existingRaw) : {};
+        // Update user object with latest info
+        userObj.email = userEmail;
+        userObj.access_token = tokens.access_token;
+        userObj.refresh_token = tokens.refresh_token;
+        userObj.token_expiry = tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : null;
+        userObj.alerts = userObj.alerts || [];
+        // Add other fields as needed
+        await redis.set(userKey, JSON.stringify(userObj));
+        // Set user_email cookie
+        cookies.set('user_email', userEmail, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+      }
+    }
+  }
 
   // Store tokens in httpOnly cookie for session (optional)
-  cookies.set('access_token', tokens.access_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-  cookies.set('refresh_token', tokens.refresh_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+  if (userObj) {
+    cookies.set('access_token', userObj.access_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+    cookies.set('refresh_token', userObj.refresh_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+  }
 
   // Redirect to your app's home or dashboard
   return redirect(302, '/');

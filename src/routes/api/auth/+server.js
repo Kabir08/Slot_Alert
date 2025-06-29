@@ -1,7 +1,5 @@
 // OAuth2 login and callback endpoints for Google
 import { json, redirect } from '@sveltejs/kit';
-import { redis } from '$lib/redis.js';
-import { getValidAccessToken } from '$lib/auth-helpers.js';
 
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
@@ -29,9 +27,6 @@ export async function POST({ request, cookies }) {
 	});
 	const tokens = await res.json();
 	if (tokens.error) return json({ error: tokens.error }, { status: 400 });
-	// Store tokens in Redis (keyed by a session/user id, here just 'user' for demo)
-	if (tokens.access_token) await redis.set('user:access_token', tokens.access_token);
-	if (tokens.refresh_token) await redis.set('user:refresh_token', tokens.refresh_token);
 	// Store tokens in httpOnly cookie for session (optional)
 	cookies.set('access_token', tokens.access_token, { path: '/', httpOnly: true, secure: true });
 	cookies.set('refresh_token', tokens.refresh_token, { path: '/', httpOnly: true, secure: true });
@@ -63,10 +58,6 @@ export async function GET({ url, cookies }) {
 	});
 	const tokens = await res.json();
 	if (tokens.error) return new Response('Token error: ' + tokens.error, { status: 400 });
-
-	// Store tokens in Redis (keyed by a session/user id, here just 'user' for demo)
-	if (tokens.access_token) await redis.set('user:access_token', tokens.access_token);
-	if (tokens.refresh_token) await redis.set('user:refresh_token', tokens.refresh_token);
 
 	// Store tokens in httpOnly cookie for session (optional)
 	cookies.set('access_token', tokens.access_token, { path: '/', httpOnly: true, secure: true });
