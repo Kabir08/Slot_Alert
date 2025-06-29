@@ -7,5 +7,14 @@ export async function GET({ cookies, url }) {
   const sender = url.searchParams.get('sender');
   if (!access_token || !sender) return json({ error: 'Missing token or sender' }, { status: 400 });
   const messages = await getNewMessages(access_token, sender);
-  return json({ messages });
+  // Only return the fields needed for the UI
+  return json({
+    messages: messages.map(m => ({
+      id: m.id,
+      title: m.snippet,
+      subject: m.subject,
+      from: m.from,
+      time: m.internalDate
+    }))
+  });
 }

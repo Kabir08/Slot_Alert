@@ -40,7 +40,12 @@
   <div>{status}</div>
   <ul>
     {#each messages as msg}
-      <li>{msg.id}</li>
+      <li>
+        <strong>Subject:</strong> {msg.subject}<br>
+        <strong>From:</strong> {msg.from}<br>
+        <strong>Title:</strong> {msg.title}<br>
+        <strong>Time:</strong> {new Date(Number(msg.time)).toLocaleString()}
+      </li>
     {/each}
   </ul>
 </main>
