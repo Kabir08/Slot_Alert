@@ -4,8 +4,8 @@ const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
 
 export async function getValidAccessToken() {
-  let access_token = await redis.get('user:access_token');
-  const refresh_token = await redis.get('user:refresh_token');
+  let access_token = (await redis.get('user:access_token')) || process.env.GMAIL_ACCESS_TOKEN;
+  const refresh_token = (await redis.get('user:refresh_token')) || process.env.GMAIL_REFRESH_TOKEN;
   // Optionally, check if access_token is expired (not shown here)
   if (!access_token && refresh_token) {
     const res = await fetch('https://oauth2.googleapis.com/token', {
