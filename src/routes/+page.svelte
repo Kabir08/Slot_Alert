@@ -29,11 +29,11 @@
     status = messages.length ? `Found ${messages.length} messages.` : 'No new messages.';
   }
 
-  async function setAlert(alert) {
+  async function setAlert(criteria) {
     await fetch('/api/alerts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(alert)
+      body: JSON.stringify(criteria)
     });
     alert('Alert set!');
   }
