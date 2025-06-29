@@ -16,7 +16,18 @@ export default async function handler(event, context) {
   // 2. For each alert, check for new messages
   let triggered = false;
   for (const alertStr of alerts) {
-    const alert = JSON.parse(alertStr);
+    console.log('typeof alertStr:', typeof alertStr, 'alertStr:', alertStr);
+    let alert;
+    if (typeof alertStr === 'string') {
+      try {
+        alert = JSON.parse(alertStr);
+      } catch (e) {
+        console.error('Failed to parse alertStr:', alertStr, e);
+        continue;
+      }
+    } else {
+      alert = alertStr;
+    }
     // Build Gmail query from alert
     let query = '';
     if (alert.sender) query += `from:${alert.sender} `;
