@@ -24,8 +24,8 @@ export default async function handler(event, context) {
     if (alert.text) query += `${alert.text} `;
     const messages = await getNewMessages(process.env.GMAIL_ACCESS_TOKEN, query.trim());
     if (messages && messages.length > 0) {
-      // 3. Trigger Telegram alarm
-      await sendTelegramAlarm(`ALERT: New mail matched your alert!\n${JSON.stringify(messages[0], null, 2)}`);
+      // 3. Trigger Telegram alarm for 180 seconds (180 messages, 1 per second)
+      await sendTelegramAlarm(`ALERT: New mail matched your alert!\n${JSON.stringify(messages[0], null, 2)}`, 180);
       triggered = true;
     }
   }
@@ -38,5 +38,5 @@ export default async function handler(event, context) {
 
 // Netlify scheduled function config
 export const config = {
-  schedule: '@every 10m' // every 10 minutes
+  schedule: '@every 1m' // every 1 minute (minimum allowed by Netlify)
 };

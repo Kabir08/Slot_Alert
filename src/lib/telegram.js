@@ -1,5 +1,7 @@
 export async function sendTelegramAlarm(message, repeat = 60, chatId = process.env.TELEGRAM_CHAT_ID) {
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+  console.log('DEBUG: BOT_TOKEN:', BOT_TOKEN);
+  console.log('DEBUG: CHAT_ID:', chatId);
   for (let i = 0; i < repeat; i++) {
     try {
       const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
