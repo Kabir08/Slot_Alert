@@ -6,7 +6,10 @@ const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
 export async function getValidAccessToken(userEmail) {
   if (!userEmail) return null;
   const userRaw = await redis.get(`user:${userEmail}`);
-  if (!userRaw) return null;
+  if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
+    console.error('Invalid user object in Redis:', userRaw);
+    return null;
+  }
   const user = JSON.parse(userRaw);
   let access_token = user.access_token;
   const refresh_token = user.refresh_token;
