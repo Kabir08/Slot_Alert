@@ -61,6 +61,7 @@ export async function GET({ url, cookies }) {
         userObj.token_expiry = tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : null;
         userObj.alerts = userObj.alerts || [];
         // Add other fields as needed
+        // Always save as JSON string
         await redis.set(userKey, JSON.stringify(userObj));
         // Set user_email cookie
         cookies.set('user_email', userEmail, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
