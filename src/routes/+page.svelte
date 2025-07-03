@@ -26,7 +26,15 @@
     const params = new URLSearchParams();
     if (query) params.append('q', query);
     const res = await fetch(`/api/check-mail?${params.toString()}`);
+    if (res.status === 401) {
+      logout();
+      return;
+    }
     const data = await res.json();
+    if (data && data.error === 'User not found') {
+      logout();
+      return;
+    }
     messages = data.messages || [];
     status = messages.length ? `Found ${messages.length} messages.` : 'No new messages.';
   }
@@ -42,7 +50,15 @@
 
   async function fetchAlerts() {
     const res = await fetch('/api/alerts');
+    if (res.status === 401) {
+      logout();
+      return;
+    }
     const data = await res.json();
+    if (data && data.error === 'User not found') {
+      logout();
+      return;
+    }
     alerts = data.alerts || [];
   }
 
@@ -222,23 +238,4 @@
     background: #333; color: #fff;
     padding: 12px 24px; border-radius: 6px;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  }
-  .logout-btn {
-    background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5em 1.2em;
-    margin-left: 1em;
-    font-weight: 600;
-    font-size: 1em;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255,88,88,0.08);
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .logout-btn:hover {
-    background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
-    box-shadow: 0 4px 16px rgba(255,88,88,0.15);
-  }
-</style>
+    box-shadow: 0 2px 8px rgba(
