@@ -33,7 +33,7 @@ export async function GET({ url, cookies }) {
 
   // Fetch user's email using the access token
   let userEmail = null;
-  let userObj = null;
+  let userObj = {};
   if (tokens.access_token) {
     const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${tokens.access_token}` }
@@ -43,11 +43,19 @@ export async function GET({ url, cookies }) {
       userEmail = userinfo.email;
       if (userEmail) {
         const userKey = `user:${userEmail}`;
-        // Try to load existing user object
+        // Try to load existing user object with robust JSON parsing
         const existingRaw = await redis.get(userKey);
-        userObj = existingRaw ? JSON.parse(existingRaw) : {};
+        if (existingRaw && typeof existingRaw === 'string' && existingRaw.trim().startsWith('{')) {
+          try {
+            userObj = JSON.parse(existingRaw);
+          } catch (e) {
+            console.error('Failed to parse user object from Redis:', existingRaw, e);
+            userObj = {};
+          }
+        }
         // Update user object with latest info
         userObj.email = userEmail;
+        userObj.name = userinfo.name || userObj.name;
         userObj.access_token = tokens.access_token;
         userObj.refresh_token = tokens.refresh_token;
         userObj.token_expiry = tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : null;
