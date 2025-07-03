@@ -55,6 +55,16 @@
     await fetchAlerts();
   }
 
+  function logout() {
+    // Remove all cookies (best effort, works for most modern browsers)
+    document.cookie.split(';').forEach(c => {
+      document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
+    });
+    // Optionally clear localStorage/sessionStorage if used
+    // Reload the page to reset state
+    window.location.reload();
+  }
+
   $: if (activeTab === 'alerts' && loggedIn) fetchAlerts();
 </script>
 
@@ -62,6 +72,9 @@
   <a href="/">Home</a>
   <a href="/journey">Project Journey</a>
   <a href="/privacy">Privacy Policy</a>
+  {#if loggedIn}
+    <button class="logout-btn" on:click={logout}>Logout</button>
+  {/if}
 </nav>
 
 {#if showToast}
@@ -210,5 +223,22 @@
     padding: 12px 24px; border-radius: 6px;
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .logout-btn {
+    background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5em 1.2em;
+    margin-left: 1em;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255,88,88,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .logout-btn:hover {
+    background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
+    box-shadow: 0 4px 16px rgba(255,88,88,0.15);
   }
 </style>
