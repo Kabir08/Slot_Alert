@@ -1,15 +1,23 @@
 // Gmail API helper functions
 import { getValidAccessToken } from '$lib/auth-helpers.js';
 
-export async function getNewMessages(_access_token, query) {
+export async function getNewMessages(userEmail, query) {
   // Always get a valid access token (refresh if needed)
-  const access_token = await getValidAccessToken();
+  let access_token = await getValidAccessToken(userEmail);
   if (!access_token) return [];
   console.log('Gmail API Query:', query);
   // Fetch the latest 5 messages matching the query
-  const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=5`, {
+  let listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=5`, {
     headers: { Authorization: `Bearer ${access_token}` }
   });
+  // Hybrid approach: if 401, refresh and retry once
+  if (listRes.status === 401) {
+    access_token = await getValidAccessToken(userEmail, { forceRefresh: true });
+    if (!access_token) return [];
+    listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=5`, {
+      headers: { Authorization: `Bearer ${access_token}` }
+    });
+  }
   const listData = await listRes.json();
   console.log('Gmail API List Response:', JSON.stringify(listData, null, 2));
   if (!listData.messages) return [];
