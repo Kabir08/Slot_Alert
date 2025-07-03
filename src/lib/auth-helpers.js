@@ -32,6 +32,7 @@ export async function getValidAccessToken(userEmail) {
         access_token = data.access_token;
         user.access_token = access_token;
         user.token_expiry = data.expires_in ? Date.now() + data.expires_in * 1000 : null;
+        console.log('Saving user to Redis:', JSON.stringify(user));
         await redis.set(`user:${userEmail}`, JSON.stringify(user));
       }
     }
