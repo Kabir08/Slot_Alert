@@ -38,3 +38,50 @@
   <h2>Contact</h2>
   <p>For questions or concerns, contact us at support@slotalert.app.</p>
 </article>
+
+<style>
+h1 {
+  text-align: center;
+  margin-top: 2em;
+  color: #0077cc;
+  font-size: 2.2em;
+  letter-spacing: 0.01em;
+}
+article {
+  max-width: 700px;
+  margin: 2em auto 3em auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 2.5em 2em 2em 2em;
+  font-size: 1.13em;
+  color: #222;
+}
+article h2 {
+  color: #0077cc;
+  margin-top: 1.7em;
+  font-size: 1.25em;
+  border-left: 4px solid #0077cc;
+  padding-left: 0.5em;
+  margin-bottom: 0.7em;
+}
+article ul {
+  margin: 0 0 1.5em 1.2em;
+  padding-left: 1.2em;
+}
+article li {
+  margin-bottom: 0.7em;
+  line-height: 1.6;
+}
+article p {
+  margin-bottom: 1.2em;
+}
+@media (max-width: 600px) {
+  article {
+    padding: 1.2em 0.7em;
+  }
+  h1 {
+    font-size: 1.4em;
+  }
+}
+</style>
