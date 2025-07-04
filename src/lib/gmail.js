@@ -44,8 +44,8 @@ export async function getNewMessages(userEmail, query) {
 }
 
 // Check if a message is unread
-export async function isMessageUnread(messageId) {
-  const access_token = await getValidAccessToken();
+export async function isMessageUnread(messageId, userEmail) {
+  const access_token = await getValidAccessToken(userEmail);
   if (!access_token) return false;
   const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=metadata`, {
     headers: { Authorization: `Bearer ${access_token}` }
@@ -55,8 +55,8 @@ export async function isMessageUnread(messageId) {
 }
 
 // Add a label to a message (creates label if needed)
-export async function addLabelToMessage(messageId, labelName = 'Processed by Slot Alert') {
-  const access_token = await getValidAccessToken();
+export async function addLabelToMessage(messageId, labelName = 'Processed by Slot Alert', userEmail) {
+  const access_token = await getValidAccessToken(userEmail);
   if (!access_token) return false;
   // Get or create label
   let labelId = await getOrCreateLabelId(labelName, access_token);

@@ -30,7 +30,12 @@ export default async function handler(event, context) {
       }
       const userEmail = key.replace('user:', '');
       const alerts = user.alerts || [];
-      const chatId = user.telegram_chat_id;
+      const chatId = user.telegram_chat_id || process.env.TELEGRAM_CHAT_ID;
+      // If chatId was missing, save it to user object in Redis for future use
+      if (!user.telegram_chat_id && chatId) {
+        user.telegram_chat_id = chatId;
+        await redis.set(key, JSON.stringify(user));
+      }
       if (!Array.isArray(alerts) || alerts.length === 0 || !chatId) {
         continue; // No alerts or no Telegram chat linked
       }
