@@ -15,8 +15,12 @@ export async function handle({ event, resolve }) {
     if (!accessToken || !userEmail) {
       return new Response('Unauthorized', { status: 401 });
     }
-    // Check that user object exists in Redis
-    const userRaw = await redis.get(`user:${userEmail}`);
+    // Decode userEmail for Redis key
+    const decodedEmail = decodeURIComponent(userEmail);
+    const redisKey = `user:${decodedEmail}`;
+    console.log('Looking up Redis key:', redisKey);
+    const userRaw = await redis.get(redisKey);
+    console.log('Raw value fetched from Redis:', userRaw);
     if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
       return new Response('Unauthorized', { status: 401 });
     }
