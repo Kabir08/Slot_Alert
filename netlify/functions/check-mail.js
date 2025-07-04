@@ -8,7 +8,8 @@ export default async (request, context) => {
   // Get cookies from request headers
   const cookieHeader = request.headers.get('cookie') || '';
   const cookies = Object.fromEntries(cookieHeader.split(';').map(c => c.trim().split('=')));
-  const userEmail = cookies['user_email'];
+  let userEmail = cookies['user_email'];
+  if (userEmail) userEmail = decodeURIComponent(userEmail);
   console.log('Netlify/check-mail: user_email from cookie:', userEmail);
   if (!userEmail) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
