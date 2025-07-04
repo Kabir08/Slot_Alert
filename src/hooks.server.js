@@ -9,11 +9,7 @@ export async function handle({ event, resolve }) {
 
   // Protect all other /api routes
   if (event.url.pathname.startsWith('/api/')) {
-    const sessionId = event.cookies.get('session_id');
-    if (!sessionId) {
-      return new Response('Unauthorized', { status: 401 });
-    }
-    const userEmail = await redis.get(`session:${sessionId}`);
+    const userEmail = event.cookies.get('user_email');
     if (!userEmail) {
       return new Response('Unauthorized', { status: 401 });
     }

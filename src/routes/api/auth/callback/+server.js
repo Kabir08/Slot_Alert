@@ -1,7 +1,6 @@
 // Handles OAuth2 callback from Google
 import { redirect } from '@sveltejs/kit';
 import { redis } from '$lib/redis.js';
-import { randomUUID } from 'crypto';
 
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
@@ -65,11 +64,8 @@ export async function GET({ url, cookies }) {
         // Always save as JSON string
         if (typeof userObj !== 'object' || userObj === null) throw new Error('User must be an object');
         await redis.set(userKey, JSON.stringify(userObj));
-        // Generate random session ID
-        const sessionId = randomUUID();
-        await redis.set(`session:${sessionId}`, userEmail, { ex: 60 * 60 * 24 * 7 }); // 7 days expiry
-        // Set session_id cookie
-        cookies.set('session_id', sessionId, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+        // Set user_email cookie
+        cookies.set('user_email', userEmail, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
       }
     }
   }
