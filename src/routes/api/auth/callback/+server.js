@@ -70,12 +70,6 @@ export async function GET({ url, cookies }) {
     }
   }
 
-  // Store tokens in httpOnly cookie for session (optional)
-  if (userObj) {
-    cookies.set('access_token', userObj.access_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-    cookies.set('refresh_token', userObj.refresh_token, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-  }
-
   // Redirect to your app's home or dashboard
   return redirect(302, '/');
 }
