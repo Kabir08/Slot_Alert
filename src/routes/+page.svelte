@@ -9,6 +9,8 @@
   let alerts = [];
 
   onMount(async () => {
+    // Log cookies for debugging
+    console.log('Client cookies:', document.cookie);
     // Try to fetch a protected endpoint to check login
     const res = await fetch('/api/check-mail?sender=me');
     loggedIn = res.status !== 401;
@@ -25,6 +27,9 @@
   async function checkMail() {
     const params = new URLSearchParams();
     if (query) params.append('q', query);
+    // Log cookies and request for debugging
+    console.log('Client cookies before checkMail:', document.cookie);
+    console.log('Sending fetch to:', `/api/check-mail?${params.toString()}`);
     const res = await fetch(`/api/check-mail?${params.toString()}`);
     if (res.status === 401) {
       logout();
