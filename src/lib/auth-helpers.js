@@ -8,7 +8,13 @@ export async function getValidAccessToken(userEmail) {
     console.error('getValidAccessToken: No userEmail provided');
     return null;
   }
-  const userRaw = await redis.get(`user:${userEmail}`);
+  let userRaw = await redis.get(`user:${userEmail}`);
+  // Auto-fix: If userRaw is an object, stringify and re-save
+  if (typeof userRaw === 'object' && userRaw !== null) {
+    console.warn('getValidAccessToken: userRaw is an object, auto-stringifying and saving to Redis:', userRaw);
+    await redis.set(`user:${userEmail}`, JSON.stringify(userRaw));
+    userRaw = JSON.stringify(userRaw);
+  }
   if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
     console.error('getValidAccessToken: Invalid user object in Redis:', userRaw);
     return null;
