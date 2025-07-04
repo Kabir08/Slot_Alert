@@ -5,7 +5,9 @@ import { getValidAccessToken } from '$lib/auth-helpers.js';
 
 export async function GET({ cookies, url }) {
   console.log('=== /api/check-mail handler invoked ===');
-  const userEmail = cookies.get('user_email');
+  // Robustly decode user_email cookie (handles URL-encoded values)
+  let userEmail = cookies.get('user_email');
+  if (userEmail) userEmail = decodeURIComponent(userEmail);
   console.log('API/check-mail: user_email from cookie:', userEmail);
   if (!userEmail) return json({ error: 'Unauthorized' }, { status: 401 });
   const access_token = await getValidAccessToken(userEmail);
