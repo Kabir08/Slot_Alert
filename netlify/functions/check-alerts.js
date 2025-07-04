@@ -72,10 +72,10 @@ export default async function handler(event, context) {
     }
   } while (cursor !== 0);
 
-  return {
-    statusCode: 200,
-    body: `Checked ${totalUsers} users, ${totalAlerts} alerts. Triggered: ${triggered}`
-  };
+  return new Response(
+    `Checked ${totalUsers} users, ${totalAlerts} alerts. Triggered: ${triggered}`,
+    { status: 200, headers: { 'Content-Type': 'text/plain' } }
+  );
 }
 
 // Netlify scheduled function config
