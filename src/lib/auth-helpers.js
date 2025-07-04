@@ -10,7 +10,7 @@ export async function getValidAccessToken(userEmail) {
     console.error('Invalid user object in Redis:', userRaw);
     // Self-healing: delete the bad key
     // await redis.del(`user:${userEmail}`);
-    return null;
+    // return null;
   }
   const user = JSON.parse(userRaw);
   let access_token = user.access_token;
