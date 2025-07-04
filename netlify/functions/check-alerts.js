@@ -14,15 +14,18 @@ export default async function handler(event, context) {
     for (const key of keys) {
       totalUsers++;
       let userRaw = await redis.get(key);
-      if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
-        console.warn('Skipping invalid user object:', key);
-        continue;
-      }
       let user;
-      try {
-        user = JSON.parse(userRaw);
-      } catch (e) {
-        console.warn('Skipping unparsable user object:', key);
+      if (typeof userRaw === 'object' && userRaw !== null) {
+        user = userRaw;
+      } else if (typeof userRaw === 'string' && userRaw.trim().startsWith('{')) {
+        try {
+          user = JSON.parse(userRaw);
+        } catch (e) {
+          console.warn('Skipping unparsable user object:', key);
+          continue;
+        }
+      } else {
+        console.warn('Skipping invalid user object:', key);
         continue;
       }
       const userEmail = key.replace('user:', '');
