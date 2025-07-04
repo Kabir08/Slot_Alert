@@ -12,7 +12,7 @@
     // Log cookies for debugging
     console.log('Client cookies:', document.cookie);
     // Try to fetch a protected endpoint to check login
-    const res = await fetch('/api/check-mail?sender=me', { credentials: 'include' });
+    const res = await fetch('/.netlify/functions/check-mail?sender=me', { credentials: 'include' });
     loggedIn = res.status !== 401;
     if (loggedIn && window.location.search.includes('code=')) {
       showToast = true;
@@ -29,8 +29,8 @@
     if (query) params.append('q', query);
     // Log cookies and request for debugging
     console.log('Client cookies before checkMail:', document.cookie);
-    console.log('Sending fetch to:', `/api/check-mail?${params.toString()}`);
-    const res = await fetch(`/api/check-mail?${params.toString()}`, { credentials: 'include' });
+    console.log('Sending fetch to:', `/.netlify/functions/check-mail?${params.toString()}`);
+    const res = await fetch(`/.netlify/functions/check-mail?${params.toString()}`, { credentials: 'include' });
     if (res.status === 401) {
       logout();
       return;
@@ -45,7 +45,7 @@
   }
 
   async function setAlert(criteria) {
-    await fetch('/api/alerts', {
+    await fetch('/.netlify/functions/alerts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(criteria),
@@ -55,7 +55,7 @@
   }
 
   async function fetchAlerts() {
-    const res = await fetch('/api/alerts', { credentials: 'include' });
+    const res = await fetch('/.netlify/functions/alerts', { credentials: 'include' });
     if (res.status === 401) {
       logout();
       return;
@@ -69,7 +69,7 @@
   }
 
   async function deleteAlert(alert) {
-    await fetch('/api/alerts', {
+    await fetch('/.netlify/functions/alerts', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(alert),
