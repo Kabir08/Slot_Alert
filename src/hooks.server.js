@@ -2,8 +2,11 @@
 import { redis } from '$lib/redis.js';
 
 export async function handle({ event, resolve }) {
-  // Allow public access to auth endpoints
-  if (event.url.pathname.startsWith('/api/auth')) {
+  // Allow public access to auth endpoints and /api/docs
+  if (
+    event.url.pathname.startsWith('/api/auth') ||
+    event.url.pathname === '/api/docs'
+  ) {
     return resolve(event);
   }
 
