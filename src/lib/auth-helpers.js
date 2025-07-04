@@ -11,6 +11,7 @@ export async function getValidAccessToken(userEmail) {
     return null;
   }
   const user = JSON.parse(userRaw);
+  console.log('Parsed user object:', user);
   let access_token = user.access_token;
   const refresh_token = user.refresh_token;
   const token_expiry = user.token_expiry;
