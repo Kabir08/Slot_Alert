@@ -9,21 +9,20 @@ export async function getValidAccessToken(userEmail) {
     return null;
   }
   let userRaw = await redis.get(`user:${userEmail}`);
-  // Auto-fix: If userRaw is an object, stringify and re-save
-  if (typeof userRaw === 'object' && userRaw !== null) {
-    console.warn('getValidAccessToken: userRaw is an object, auto-stringifying and saving to Redis:', userRaw);
-    await redis.set(`user:${userEmail}`, JSON.stringify(userRaw));
-    userRaw = JSON.stringify(userRaw);
-  }
-  if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
-    console.error('getValidAccessToken: Invalid user object in Redis:', userRaw);
-    return null;
-  }
   let user;
-  try {
-    user = JSON.parse(userRaw);
-  } catch (e) {
-    console.error('getValidAccessToken: Failed to parse user object:', userRaw, e);
+  if (typeof userRaw === 'object' && userRaw !== null) {
+    // Upstash/Redis client may auto-parse JSON
+    console.warn('getValidAccessToken: userRaw is already an object, using directly:', userRaw);
+    user = userRaw;
+  } else if (typeof userRaw === 'string' && userRaw.trim().startsWith('{')) {
+    try {
+      user = JSON.parse(userRaw);
+    } catch (e) {
+      console.error('getValidAccessToken: Failed to parse user object:', userRaw, e);
+      return null;
+    }
+  } else {
+    console.error('getValidAccessToken: Invalid user object in Redis:', userRaw);
     return null;
   }
   console.log('getValidAccessToken: Parsed user object:', user);
