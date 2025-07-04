@@ -3,38 +3,43 @@
 import { getNewMessages } from '../../src/lib/gmail.js';
 import { getValidAccessToken } from '../../src/lib/auth-helpers.js';
 
-export default async function handler(event, context) {
+export default async (request, context) => {
   console.log('=== Netlify Function: /check-mail handler invoked ===');
-  // Netlify functions get cookies from headers
-  const cookieHeader = event.headers.cookie || '';
+  // Get cookies from request headers
+  const cookieHeader = request.headers.get('cookie') || '';
   const cookies = Object.fromEntries(cookieHeader.split(';').map(c => c.trim().split('=')));
   const userEmail = cookies['user_email'];
   console.log('Netlify/check-mail: user_email from cookie:', userEmail);
-  if (!userEmail) return {
-    statusCode: 401,
-    body: JSON.stringify({ error: 'Unauthorized' })
-  };
+  if (!userEmail) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
   const access_token = await getValidAccessToken(userEmail);
   console.log('Netlify/check-mail: access_token:', access_token);
-  if (!access_token) return {
-    statusCode: 401,
-    body: JSON.stringify({ error: 'Unauthorized' })
-  };
-  const url = new URL(event.rawUrl || `https://${event.headers.host}${event.path}${event.rawQuery ? '?' + event.rawQuery : ''}`);
+  if (!access_token) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  // Parse query params from request.url
+  const url = new URL(request.url);
   const q = url.searchParams.get('q');
   const query = (q && q.trim()) ? q : '';
   console.log('Netlify/check-mail: Making Gmail API request for user:', userEmail, 'with query:', query);
   const messages = await getNewMessages(userEmail, query);
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      messages: messages.map(m => ({
-        id: m.id,
-        title: m.snippet,
-        subject: m.subject,
-        from: m.from,
-        time: m.internalDate
-      }))
-    })
-  };
-}
+  return new Response(JSON.stringify({
+    messages: messages.map(m => ({
+      id: m.id,
+      title: m.snippet,
+      subject: m.subject,
+      from: m.from,
+      time: m.internalDate
+    }))
+  }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
