@@ -48,13 +48,14 @@
     await fetch('/api/alerts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(criteria)
+      body: JSON.stringify(criteria),
+      credentials: 'include'
     });
     alert('Alert set!');
   }
 
   async function fetchAlerts() {
-    const res = await fetch('/api/alerts');
+    const res = await fetch('/api/alerts', { credentials: 'include' });
     if (res.status === 401) {
       logout();
       return;
@@ -71,7 +72,8 @@
     await fetch('/api/alerts', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(alert)
+      body: JSON.stringify(alert),
+      credentials: 'include'
     });
     await fetchAlerts();
   }
