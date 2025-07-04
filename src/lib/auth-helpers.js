@@ -11,6 +11,7 @@ export async function getValidAccessToken(userEmail) {
     // Self-healing: delete the bad key
     // await redis.del(`user:${userEmail}`);
     // return null;
+    // For debugging, do not return early so you can inspect the value
   }
   const user = JSON.parse(userRaw);
   let access_token = user.access_token;
