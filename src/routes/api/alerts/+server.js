@@ -30,6 +30,7 @@ export async function POST({ request, cookies }) {
 	}
 	user.alerts = user.alerts || [];
 	user.alerts.push({ sender, subject, text });
+	if (typeof user !== 'object' || user === null) throw new Error('User must be an object');
 	await redis.set(`user:${userEmail}`, JSON.stringify(user));
 	return json({ success: true });
 }
@@ -51,6 +52,7 @@ export async function DELETE({ request, cookies }) {
 	if (!userRaw) return json({ error: 'User not found' }, { status: 404 });
 	const user = safeParseUser(userRaw);
 	user.alerts = (user.alerts || []).filter(a => !(a.sender === sender && a.subject === subject && a.text === text));
+	if (typeof user !== 'object' || user === null) throw new Error('User must be an object');
 	await redis.set(`user:${userEmail}`, JSON.stringify(user));
 	return json({ success: true });
 }

@@ -25,6 +25,7 @@ export async function POST({ request }) {
       user.telegram_user_id = telegramUserId;
       user.telegram_username = username;
       user.telegram_first_name = firstName;
+      if (typeof user !== 'object' || user === null) throw new Error('User must be an object');
       await redis.set(`user:${userEmail}`, JSON.stringify(user));
     }
   }

@@ -62,6 +62,7 @@ export async function GET({ url, cookies }) {
         userObj.alerts = userObj.alerts || [];
         // Add other fields as needed
         // Always save as JSON string
+        if (typeof userObj !== 'object' || userObj === null) throw new Error('User must be an object');
         await redis.set(userKey, JSON.stringify(userObj));
         // Set user_email cookie
         cookies.set('user_email', userEmail, { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
