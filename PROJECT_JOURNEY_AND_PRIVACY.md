@@ -1,7 +1,16 @@
-# Slot Alert Project Journey
+# Slot Alert Project Journey & Privacy
 
 ## Project Overview
 Slot Alert is a SvelteKit app that lets users set up alerts for new Gmail messages and receive notifications via Telegram. The app uses Google OAuth2 for authentication, Upstash Redis for storage, and is deployed on Netlify.
+
+## Privacy Policy
+- **Data Storage:** Only alert criteria, message IDs, and minimal user info (email, Telegram chat ID, tokens) are stored in Upstash Redis. No email content is stored.
+- **Token Security:** OAuth tokens are stored securely and only used for the user's own alerts.
+- **Telegram:** Your Telegram chat ID is only used to send you notifications you have requested.
+- **Cookies:** Used for session management and are set securely.
+- **User Control:** You can delete your alerts or unlink your Telegram at any time.
+- **No Analytics:** Slot Alert does not use third-party analytics or tracking.
+- **Open Source:** All code is public for transparency.
 
 ## Timeline & Milestones
 

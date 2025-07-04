@@ -64,9 +64,6 @@ export default async function handler(event, context) {
             }
             if (!stillUnread) {
               await addLabelToMessage(msg.id, 'Processed by Slot Alert', userEmail);
-              console.log(`Stopped alerts for message ${msg.id} after user read it. Labeled as processed.`);
-            } else {
-              console.log(`Sent ${sentCount} alerts for message ${msg.id}, still unread.`);
             }
             triggered++;
           }

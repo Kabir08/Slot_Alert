@@ -5,7 +5,6 @@ export async function getNewMessages(userEmail, query) {
   // Always get a valid access token (refresh if needed)
   let access_token = await getValidAccessToken(userEmail);
   if (!access_token) return [];
-  console.log('Gmail API Query:', query);
   // Fetch the latest 5 messages matching the query
   let listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=5`, {
     headers: { Authorization: `Bearer ${access_token}` }
@@ -19,7 +18,6 @@ export async function getNewMessages(userEmail, query) {
     });
   }
   const listData = await listRes.json();
-  console.log('Gmail API List Response:', JSON.stringify(listData, null, 2));
   if (!listData.messages) return [];
 
   // Fetch metadata for each message
@@ -29,7 +27,6 @@ export async function getNewMessages(userEmail, query) {
         headers: { Authorization: `Bearer ${access_token}` }
       });
       const msgData = await msgRes.json();
-      console.log('Gmail API Message Response:', JSON.stringify(msgData, null, 2));
       const headers = msgData.payload.headers;
       return {
         id: msg.id,

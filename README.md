@@ -38,7 +38,12 @@ See [`PROJECT_JOURNEY_AND_PRIVACY.md`](./PROJECT_JOURNEY_AND_PRIVACY.md) for a d
 - Set all required environment variables in the Netlify dashboard.
 
 ## Contributing
-Pull requests and issues are welcome!
+
+We welcome contributions! Please:
+- Open issues for bugs or feature requests.
+- Fork and submit pull requests for improvements.
+- Follow the code of conduct and respect user privacy.
 
 ## License
-MIT
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE).

@@ -18,9 +18,7 @@ export async function handle({ event, resolve }) {
     }
     const decodedEmail = decodeURIComponent(userEmail);
     const redisKey = `user:${decodedEmail}`;
-    console.log('Looking up Redis key:', redisKey);
     const userRaw = await redis.get(redisKey);
-    console.log('Raw value fetched from Redis:', userRaw);
     if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
       return new Response('Unauthorized', { status: 401 });
     }

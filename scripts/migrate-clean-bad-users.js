@@ -28,14 +28,12 @@ async function main() {
       total++;
       const value = await client.get(key);
       if (!(await isValidJSON(value))) {
-        console.log(`Deleting invalid user key: ${key}`);
         await client.del(key);
         deleted++;
       }
     }
   } while (cursor !== 0);
   await client.quit();
-  console.log(`Scan complete. Checked: ${total}, Deleted: ${deleted}`);
 }
 
 main().catch(err => {

@@ -25,7 +25,6 @@ export async function getValidAccessToken(userEmail) {
     console.error('getValidAccessToken: Invalid user object in Redis:', userRaw);
     return null;
   }
-  console.log('getValidAccessToken: Parsed user object:', user);
   let access_token = user.access_token;
   const refresh_token = user.refresh_token;
   const token_expiry = user.token_expiry;
@@ -41,7 +40,6 @@ export async function getValidAccessToken(userEmail) {
   // Check if access_token is expired (allow 1 min clock skew)
   if (!access_token || (token_expiry && Date.now() > token_expiry - 60000)) {
     if (refresh_token) {
-      console.log('getValidAccessToken: Access token expired or missing, attempting refresh...');
       const res = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -53,12 +51,10 @@ export async function getValidAccessToken(userEmail) {
         })
       });
       const data = await res.json();
-      console.log('getValidAccessToken: Refresh response:', data);
       if (data.access_token) {
         access_token = data.access_token;
         user.access_token = access_token;
         user.token_expiry = data.expires_in ? Date.now() + data.expires_in * 1000 : null;
-        console.log('getValidAccessToken: Saving refreshed user to Redis:', JSON.stringify(user));
         if (typeof user !== 'object' || user === null) throw new Error('User must be an object');
         await redis.set(`user:${userEmail}`, JSON.stringify(user));
       } else {

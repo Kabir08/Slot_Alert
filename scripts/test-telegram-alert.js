@@ -6,5 +6,4 @@ dotenv.config();
 
 (async () => {
   await sendTelegramAlarm('Test alarm from Slot Alert script!', 3);
-  console.log('Telegram alarm test sent!');
 })();
