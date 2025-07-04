@@ -9,13 +9,14 @@ export async function handle({ event, resolve }) {
 
   // Protect all other /api routes
   if (event.url.pathname.startsWith('/api/')) {
-    const accessToken = event.cookies.get('access_token');
-    const userEmail = event.cookies.get('user_email');
-    // Optionally, check Redis for session validity here
-    if (!accessToken || !userEmail) {
+    const sessionId = event.cookies.get('session_id');
+    if (!sessionId) {
       return new Response('Unauthorized', { status: 401 });
     }
-    // Decode userEmail for Redis key
+    const userEmail = await redis.get(`session:${sessionId}`);
+    if (!userEmail) {
+      return new Response('Unauthorized', { status: 401 });
+    }
     const decodedEmail = decodeURIComponent(userEmail);
     const redisKey = `user:${decodedEmail}`;
     console.log('Looking up Redis key:', redisKey);
@@ -24,6 +25,8 @@ export async function handle({ event, resolve }) {
     if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
       return new Response('Unauthorized', { status: 401 });
     }
+    // Attach userEmail to event.locals for downstream use
+    event.locals.userEmail = decodedEmail;
   }
 
   // Proceed as normal for all other routes

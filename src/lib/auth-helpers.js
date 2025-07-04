@@ -3,7 +3,9 @@ import { redis } from '$lib/redis.js';
 const CLIENT_ID = process.env.GMAIL_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GMAIL_CLIENT_SECRET ?? '';
 
-export async function getValidAccessToken(userEmail) {
+export async function getValidAccessToken(sessionId) {
+  if (!sessionId) return null;
+  const userEmail = await redis.get(`session:${sessionId}`);
   if (!userEmail) return null;
   const userRaw = await redis.get(`user:${userEmail}`);
   if (!userRaw || typeof userRaw !== 'string' || !userRaw.trim().startsWith('{')) {
