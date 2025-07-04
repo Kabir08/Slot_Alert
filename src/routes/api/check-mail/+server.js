@@ -4,6 +4,7 @@ import { getNewMessages } from '$lib/gmail.js';
 import { getValidAccessToken } from '$lib/auth-helpers.js';
 
 export async function GET({ cookies, url }) {
+  console.log('=== /api/check-mail handler invoked ===');
   const userEmail = cookies.get('user_email');
   console.log('API/check-mail: user_email from cookie:', userEmail);
   if (!userEmail) return json({ error: 'Unauthorized' }, { status: 401 });
