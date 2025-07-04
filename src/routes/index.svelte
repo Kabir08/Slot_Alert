@@ -10,7 +10,7 @@
 
   async function checkMail() {
     if (!sender) return;
-    const res = await fetch(`/api/check-mail?sender=${encodeURIComponent(sender)}`);
+    const res = await fetch(`/.netlify/functions/check-mail?sender=${encodeURIComponent(sender)}`);
     const data = await res.json();
     messages = data.messages || [];
     status = messages.length ? `Found ${messages.length} messages.` : 'No new messages.';
