@@ -1,9 +1,9 @@
 // netlify/functions/check-mail.js
 // Netlify function version of /api/check-mail
-const { getNewMessages } = require('../../src/lib/gmail.js');
-const { getValidAccessToken } = require('../../src/lib/auth-helpers.js');
+import { getNewMessages } from '../../src/lib/gmail.js';
+import { getValidAccessToken } from '../../src/lib/auth-helpers.js';
 
-exports.handler = async function(event, context) {
+export default async function handler(event, context) {
   console.log('=== Netlify Function: /check-mail handler invoked ===');
   // Netlify functions get cookies from headers
   const cookieHeader = event.headers.cookie || '';
@@ -37,4 +37,4 @@ exports.handler = async function(event, context) {
       }))
     })
   };
-};
+}
