@@ -60,6 +60,11 @@ export async function GET({ url, cookies }) {
         userObj.refresh_token = tokens.refresh_token;
         userObj.token_expiry = tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : null;
         userObj.alerts = userObj.alerts || [];
+        // Generate and store Telegram code and expiry
+        const { customAlphabet } = await import('nanoid');
+        const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 6);
+        userObj.telegram_code = nanoid();
+        userObj.telegram_code_expiry = Date.now() + 10 * 60 * 1000; // 10 min expiry
         // Add other fields as needed
         // Always save as JSON string
         if (typeof userObj !== 'object' || userObj === null) throw new Error('User must be an object');
